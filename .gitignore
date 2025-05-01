@@ -1,0 +1,19 @@
+# Jangan kirim file sementara
+*.log
+*.tmp
+
+# Folder yang tidak perlu
+vendor/
+node_modules/
+public/storage/
+
+# Config pribadi
+.env
+
+# Folder editor
+.vscode/
+.idea/
+
+# File OS
+.DS_Store
+Thumbs.db
