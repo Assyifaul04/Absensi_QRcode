@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Absensi QR Code</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script
+      src="https://unpkg.com/html5-qrcode"
+      type="text/javascript"
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+      <!-- Title -->
+      <header class="text-center">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-600 mb-3">
+          📘 Sistem Absensi QR Code
+        </h1>
+        <p class="text-lg sm:text-xl text-gray-600">
+          Absensi digital cepat & efisien menggunakan QR Code
+        </p>
+      </header>
+
+      <!-- Form Tambah Siswa -->
+      <section
+        class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 transition hover:shadow-2xl"
+      >
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+          Tambah Data Siswa
+        </h2>
+        <form id="form-siswa" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <input
+            type="text"
+            name="nama"
+            placeholder="Nama"
+            required
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            name="nim"
+            placeholder="NIM"
+            required
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            name="kelas"
+            placeholder="Kelas"
+            required
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div class="sm:col-span-3">
+            <button
+              type="submit"
+              class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+            >
+              ➕ Tambah Siswa
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Tabel Siswa -->
+      <section
+        class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 transition hover:shadow-2xl"
+      >
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+          Daftar Siswa & QR Code
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-4 font-semibold">Nama</th>
+                <th class="p-4 font-semibold">NIM</th>
+                <th class="p-4 font-semibold">Kelas</th>
+                <th class="p-4 font-semibold">Aksi</th>
+                <th class="p-4 font-semibold">QR Code</th>
+              </tr>
+            </thead>
+            <tbody id="table-siswa" class="bg-white">
+              <!-- Data siswa dinamis -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Scanner -->
+        <section
+          class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 transition hover:shadow-2xl"
+        >
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+            Scan QR Code (Kamera)
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <button
+              id="start-scan"
+              class="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              📷 Mulai Scan QR
+            </button>
+            <button
+              id="stop-scan"
+              class="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition hidden"
+            >
+              ✖️ Hentikan Scan
+            </button>
+          </div>
+          <div
+            id="reader"
+            class="w-full mx-auto rounded-lg overflow-hidden"
+          ></div>
+        </section>
+
+        <!-- Tabel Absensi -->
+        <section
+          class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 transition hover:shadow-2xl"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">
+              Data Absensi Hari Ini
+            </h2>
+            <button
+              id="export-excel"
+              class="py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              📁 Export ke Excel
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="p-4 font-semibold">Nama</th>
+                  <th class="p-4 font-semibold">NIM</th>
+                  <th class="p-4 font-semibold">Kelas</th>
+                  <th class="p-4 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-absensi" class="bg-white">
+                <!-- Data absensi dinamis -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("form-siswa")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const form = e.target;
+          const data = {
+            nama: form.nama.value,
+            nim: form.nim.value,
+            kelas: form.kelas.value,
+          };
+
+          const res = await fetch("/siswa", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          const siswa = await res.json();
+          loadSiswa();
+          form.reset();
+        });
+
+      async function loadSiswa() {
+        const res = await fetch("/siswa-list");
+        const siswaList = await res.json();
+        const tbody = document.querySelector("#table-siswa");
+        tbody.innerHTML = "";
+        siswaList.forEach((s) => {
+          tbody.innerHTML += `
+            <tr class="hover:bg-gray-50">
+              <td class="p-4 border-b">${s.nama}</td>
+              <td class="p-4 border-b">${s.nim}</td>
+              <td class="p-4 border-b">${s.kelas}</td>
+              <td class="p-4 border-b">
+                <button class="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onclick="generateQRCode('${s.nim}')">Generate QR</button>
+              </td>
+              <td class="p-4 border-b">
+                <img id="qr-image-${s.nim}" class="w-20 hidden" />
+              </td>
+            </tr>`;
+        });
+      }
+
+      async function loadAbsensi() {
+        const res = await fetch("/absensi/hariini");
+        const absensiList = await res.json();
+        const tbody = document.querySelector("#table-absensi");
+        tbody.innerHTML = "";
+        absensiList.forEach((a) => {
+          tbody.innerHTML += `
+            <tr class="hover:bg-gray-50">
+              <td class="p-4 border-b">${a.nama}</td>
+              <td class="p-4 border-b">${a.nim}</td>
+              <td class="p-4 border-b">${a.kelas}</td>
+              <td class="p-4 border-b font-semibold text-green-600">${a.status}</td>
+            </tr>`;
+        });
+      }
+
+      function generateQRCode(nim) {
+        QRCode.toDataURL(nim, function (err, url) {
+          if (err) return console.error("QR Error", err);
+          const img = document.getElementById(`qr-image-${nim}`);
+          img.src = url;
+          img.classList.remove("hidden");
+          alert(`QR Code untuk ${nim} berhasil dibuat!`);
+        });
+      }
+
+      function onScanSuccess(decodedText) {
+        fetch("/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nim: decodedText }),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            alert(result.message);
+            loadAbsensi();
+          });
+      }
+
+      let html5QrCode;
+
+      document.getElementById("start-scan").addEventListener("click", () => {
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+
+        Html5Qrcode.getCameras()
+          .then((devices) => {
+            if (devices && devices.length) {
+              html5QrCode.start(
+                devices[0].id,
+                { fps: 10, qrbox: 250 },
+                onScanSuccess
+              );
+            }
+          })
+          .catch((err) => console.error("Camera error:", err));
+
+        document.getElementById("start-scan").disabled = true;
+        document.getElementById("stop-scan").classList.remove("hidden");
+      });
+
+      document.getElementById("stop-scan").addEventListener("click", () => {
+        html5QrCode
+          .stop()
+          .then(() => {
+            document.getElementById("start-scan").disabled = false;
+            document.getElementById("stop-scan").classList.add("hidden");
+          })
+          .catch((err) => console.error("Stop failed:", err));
+      });
+
+      document.getElementById("export-excel").addEventListener("click", () => {
+        const table = document.querySelector("#table-absensi");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Absensi" });
+        XLSX.writeFile(wb, "Absensi.xlsx");
+      });
+
+      loadSiswa();
+      loadAbsensi();
+    </script>
+  </body>
+</html>
